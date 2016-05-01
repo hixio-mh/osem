@@ -66,6 +66,14 @@
             Yes
           - else
             No
+
+        %dt
+          Show by default
+        %dd
+          - if @splashpage.show_by_default
+            Yes
+          - else
+            No
   .row
     .col-md-12
     - if can? :update, @splashpage

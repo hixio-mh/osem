@@ -7,6 +7,12 @@ class ConferenceController < ApplicationController
   def index
     @current = Conference.where('end_date >= ?', Date.current).order('start_date ASC')
     @antiquated = @conferences - @current
+
+    # If one of the current conferences is set to be shown by default, redirect to it
+    default_splashpage = Splashpage.find_by show_by_default: true
+    return unless default_splashpage
+
+    redirect_to conference_path(default_splashpage.conference.short_title)
   end
 
   def show; end

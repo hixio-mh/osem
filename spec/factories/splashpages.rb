@@ -3,5 +3,6 @@
 FactoryGirl.define do
   factory :splashpage do
     public  false
+    show_by_default false
   end
 end

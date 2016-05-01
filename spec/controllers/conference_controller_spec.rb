@@ -8,6 +8,13 @@ describe ConferenceController do
       get :index
       expect(response.response_code).to eq(200)
     end
+
+    it 'should redirect to default conference' do
+      default_conference = create(:conference,  splashpage: create(:splashpage, public: true, show_by_default: true))
+
+      get :index
+      expect(response).to redirect_to(conference_path(default_conference.short_title))
+    end
   end
 
   describe 'GET #show' do

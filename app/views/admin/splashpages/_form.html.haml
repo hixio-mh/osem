@@ -17,5 +17,6 @@
         = f.input :include_social_media, label: 'Display social media on the splashpage?'
       = f.inputs name: 'Access' do
         = f.input :public, label: 'Make splash page public?'
+        = f.input :show_by_default, label: 'Redirect to splash page by default from home page?'
       %p.text-right
         = f.submit 'Save Splashpage', class: 'btn btn-primary'
