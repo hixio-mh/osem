@@ -79,3 +79,14 @@
         $('#banner').css('background-image', 'url("' + pattern.png() + '")');
       });
     });
+
+// Set the navigation background color as the conference color
+- unless @conference.color.blank?
+  - content_for :script_head do
+    :javascript
+      $(function () {
+        $(document).ready(function() {
+          $('.navbar-default').css('background-color', '#{@conference.color}');
+          $('.navbar-default').css('border-bottom', '1px solid #333');
+        });
+      });
