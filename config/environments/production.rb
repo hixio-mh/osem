@@ -33,7 +33,7 @@ Osem::Application.configure do
   # config.action_dispatch.x_sendfile_header = 'X-Accel-Redirect' # for nginx
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # config.force_ssl = true
+  config.force_ssl = true
 
   # See everything in the log (default is :info)
   config.log_level = :debug
@@ -66,10 +66,9 @@ Osem::Application.configure do
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 
-  # Set the detault url for action mailer
-  config.action_mailer.default_url_options = {
-    host: 'osem.seagl.org',
-  }
+  # Set the detault url and from address for action mailer
+  config.action_mailer.default_url_options = {host: 'osem.seagl.org'}
+  config.action_mailer.default_options = {from: 'no-reply@osem.seagl.org'}
 
   # Set the smtp configuration of your service provider
   # For further details of each configuration checkout: http://guides.rubyonrails.org/action_mailer_basics.html#action-mailer-configuration
