@@ -1,6 +1,8 @@
 class Splashpage < ActiveRecord::Base
   belongs_to :conference
 
+  mount_uploader :picture, PictureUploader, mount_on: :banner_file_name
+
   validate :single_show_by_default, if: :show_by_default
 
   private

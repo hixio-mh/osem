@@ -18,5 +18,10 @@
       = f.inputs name: 'Access' do
         = f.input :public, label: 'Make splash page public?'
         = f.input :show_by_default, label: 'Redirect to splash page by default from home page?'
+      = f.inputs name: 'Display' do
+        - if @splashpage.picture?
+          = image_tag @splashpage.picture.thumb.url
+        = f.input :picture, :label => false, :hint => "This will be displayed behind the conference info."
+        = f.hidden_field :picture_cache
       %p.text-right
         = f.submit 'Save Splashpage', class: 'btn btn-primary'
