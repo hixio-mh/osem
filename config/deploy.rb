@@ -26,8 +26,8 @@ task setup: :environment do
   queue! %[mkdir -p "#{deploy_to}/shared/tmp"]
   queue! %[chmod g+rx,u+rwx "#{deploy_to}/shared/tmp"]
 
-  queue! %[touch "#{deploy_to}/shared/system"]
-  queue! %[chmod g+rx,u+rwx "#{deploy_to}/shared/system"]
+  queue! %[mkdir -p "#{deploy_to}/shared/public/system"]
+  queue! %[chmod g+rx,u+rwx "#{deploy_to}/shared/public/system"]
 end
 
 desc 'Deploys the current version to the server.'
