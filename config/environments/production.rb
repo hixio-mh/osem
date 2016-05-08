@@ -68,7 +68,7 @@ Osem::Application.configure do
 
   # Set the detault url and from address for action mailer
   config.action_mailer.default_url_options = {host: 'osem.seagl.org'}
-  config.action_mailer.default_options = {from: 'no-reply@osem.seagl.org'}
+  config.action_mailer.default_options = {from: 'osem@janky.solutions'}
 
   # Set the smtp configuration of your service provider
   # For further details of each configuration checkout: http://guides.rubyonrails.org/action_mailer_basics.html#action-mailer-configuration
