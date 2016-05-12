@@ -48,7 +48,7 @@ module Admin
                                          :include_venue, :include_registrations,
                                          :include_tickets, :include_lodgings,
                                          :include_sponsors, :include_social_media,
-                                         :picture, :picture_cache)
+                                         :picture, :picture_cache, :banner_attribution)
     end
   end
 end

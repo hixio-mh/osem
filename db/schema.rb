@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160508201501) do
+ActiveRecord::Schema.define(version: 20160512035046) do
 
   create_table "ahoy_events", force: :cascade do |t|
     t.uuid     "visit_id",   limit: 16
@@ -363,6 +363,7 @@ ActiveRecord::Schema.define(version: 20160508201501) do
     t.string   "banner_content_type"
     t.integer  "banner_file_size"
     t.datetime "banner_updated_at"
+    t.string   "banner_attribution"
   end
 
   create_table "sponsors", force: :cascade do |t|

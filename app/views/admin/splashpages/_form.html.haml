@@ -23,5 +23,6 @@
           = image_tag @splashpage.picture.thumb.url
         = f.input :picture, :label => false, :hint => "This will be displayed behind the conference info."
         = f.hidden_field :picture_cache
+        = f.input :banner_attribution, hint: 'Attribution info for banner image (displayed in footer)'
       %p.text-right
         = f.submit 'Save Splashpage', class: 'btn btn-primary'
