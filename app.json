@@ -8,9 +8,7 @@
     "DATABASE_URL": {
       "required": true
     },
-    "DEPLOY_TASKS": {
-      "required": true
-    },
+    "DEPLOY_TASKS": "db:cleardb_env",
     "LANG": {
       "required": true
     },
@@ -57,6 +55,9 @@
       "required": true
     }
   },
+  "scripts": {
+    "postdeploy": "bundle exec rake db:reset data:demo"
+  },
   "formation": {
     "web": {
       "quantity": 1
@@ -72,9 +73,6 @@
   "buildpacks": [
     {
       "url": "heroku/ruby"
-    },
-    {
-      "url": "https://github.com/heroku/heroku-buildpack-ruby"
     },
     {
       "url": "https://github.com/gunpowderlabs/buildpack-ruby-rake-deploy-tasks"
