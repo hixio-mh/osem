@@ -12,6 +12,11 @@ set :rvm_path, '/usr/local/rvm/bin/rvm'
 
 # Manually create these paths in shared/ (eg: shared/config/database.yml) in your server.
 # They will be linked in the 'deploy:link_shared_paths' step.
+task :environment do
+  # For those using RVM, use this to load an RVM version@gemset.
+  invoke :'rvm:use[ruby-2.3.0]'
+end
+
 set :shared_paths, %w{ config/database.yml log public/system config/secrets.yml config/piwik.yml tmp .env.production}
 
 task setup: :environment do
