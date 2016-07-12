@@ -76,11 +76,11 @@
             %dt Difficulty:
             %dd
               - if @event.difficulty_level
-                %span.label{:style =>"background-color: #{@event.difficulty_level.color};"}
+                %span.label{:style =>"background-color: #{@event.difficulty_level.color}; color: #{ contrast_color(@event.difficulty_level.color) };"}
                   = @event.difficulty_level.title
 
           - if @event.require_registration
             .col-md-12
               %dt Requires Registration:
               %dd
-                = link_to "Yes (#{registered_text(@event)})", new_conference_conference_registrations_path(@conference.short_title), class: 'btn btn-xs btn-danger', disabled: !@event.registration_possible?
+                = link_to "Yes (#{registered_text(@event)})", new_conference_conference_registration_path(@conference.short_title), class: 'btn btn-xs btn-danger', disabled: !@event.registration_possible?
