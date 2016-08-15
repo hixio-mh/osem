@@ -103,7 +103,7 @@ module Admin
       comment.commentable = @event
       comment.user_id = current_user.id
       comment.save!
-      if !params[:parent].nil?
+      unless params[:parent].nil?
         comment.move_to_child_of(params[:parent])
       end
 
@@ -191,7 +191,7 @@ module Admin
                                     # Set also in proposals controller
                                     :title, :subtitle, :event_type_id, :abstract, :description, :require_registration, :difficulty_level_id,
                                     # Set only in admin/events controller
-                                    :track_id, :state, :language, :start_time, :is_highlight, :max_attendees,
+                                    :track_id, :state, :language, :is_highlight, :max_attendees,
                                     # Not used anymore?
                                     :proposal_additional_speakers, :user, :users_attributes)
     end
@@ -202,7 +202,7 @@ module Admin
 
     def get_event
       @event = @conference.program.events.find(params[:id])
-      if !@event
+      unless @event
         redirect_to admin_conference_program_events_path(conference_id: @conference.short_title),
                     error: 'Error! Could not find event!'
         return

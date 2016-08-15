@@ -39,6 +39,11 @@ describe 'User' do
     let(:conference_with_closed_registration) { create(:conference) }
     let!(:closed_registration_period) { create(:registration_period, conference: conference_with_closed_registration, start_date: Date.current - 6.days, end_date: Date.current - 6.days) }
 
+    let!(:my_schedule) { create(:schedule, program: my_conference.program) }
+    let!(:other_schedule) { create(:schedule, program: conference_public.program) }
+
+    let!(:my_event_schedule) { create(:event_schedule, schedule: my_schedule) }
+    let!(:other_event_schedule) { create(:event_schedule, schedule: other_schedule) }
     # Test abilities for not signed in users
     context 'when user is not signed in' do
       it{ should be_able_to(:index, Conference)}
@@ -159,7 +164,6 @@ describe 'User' do
     end
 
     context 'when user has the role organizer' do
-      let!(:my_conference) { create(:full_conference) }
       let(:role) { Role.find_by(name: 'organizer', resource: my_conference) }
       let(:user) { create(:user, role_ids: [role.id]) }
 
@@ -197,6 +201,10 @@ describe 'User' do
       it{ should_not be_able_to(:manage, conference_public.questions.first) }
       it{ should be_able_to(:manage, my_conference.program.cfp) }
       it{ should_not be_able_to(:manage, conference_public.program.cfp) }
+      it{ should be_able_to(:manage, my_schedule) }
+      it{ should_not be_able_to(:manage, other_schedule) }
+      it{ should be_able_to(:manage, my_event_schedule) }
+      it{ should_not be_able_to(:manage, other_event_schedule) }
       it{ should be_able_to(:manage, my_conference.venue) }
       it{ should_not be_able_to(:manage, conference_public.venue) }
       it{ should be_able_to(:manage, my_conference.lodgings.first) }
@@ -236,7 +244,6 @@ describe 'User' do
     end
 
     context 'when user has the role cfp' do
-      let!(:my_conference) { create(:full_conference) }
       let(:role) { Role.find_by(name: 'cfp', resource: my_conference) }
       let(:user) { create(:user, role_ids: [role.id]) }
 
@@ -262,6 +269,10 @@ describe 'User' do
       it{ should_not be_able_to(:manage, conference_public.questions.first) }
       it{ should be_able_to(:manage, my_conference.program.cfp) }
       it{ should_not be_able_to(:manage, conference_public.program.cfp) }
+      it{ should_not be_able_to(:manage, my_schedule) }
+      it{ should_not be_able_to(:manage, other_schedule) }
+      it{ should_not be_able_to(:manage, my_event_schedule) }
+      it{ should_not be_able_to(:manage, other_event_schedule) }
       it{ should_not be_able_to(:manage, my_conference.venue) }
       it{ should be_able_to(:show, my_conference.venue) }
       it{ should_not be_able_to(:manage, conference_public.venue) }
@@ -295,7 +306,6 @@ describe 'User' do
     end
 
     context 'when user has the role info_desk' do
-      let!(:my_conference) { create(:full_conference) }
       let(:role) { Role.find_by(name: 'info_desk', resource: my_conference) }
       let(:user) { create(:user, role_ids: [role.id]) }
 
@@ -321,6 +331,10 @@ describe 'User' do
       it{ should_not be_able_to(:manage, conference_public.questions.first) }
       it{ should_not be_able_to(:manage, my_conference.program.cfp) }
       it{ should_not be_able_to(:manage, conference_public.program.cfp) }
+      it{ should_not be_able_to(:manage, my_schedule) }
+      it{ should_not be_able_to(:manage, other_schedule) }
+      it{ should_not be_able_to(:manage, my_event_schedule) }
+      it{ should_not be_able_to(:manage, other_event_schedule) }
       it{ should_not be_able_to(:manage, my_conference.venue) }
       it{ should_not be_able_to(:show, my_conference.venue) }
       it{ should_not be_able_to(:manage, conference_public.venue) }
@@ -354,7 +368,6 @@ describe 'User' do
     end
 
     context 'when user has the role volunteers_coordinator' do
-      let!(:my_conference) { create(:full_conference) }
       let(:role) { Role.find_by(name: 'volunteers_coordinator', resource: my_conference) }
       let(:user) { create(:user, role_ids: [role.id]) }
 
@@ -380,6 +393,10 @@ describe 'User' do
       it{ should_not be_able_to(:manage, conference_public.questions.first) }
       it{ should_not be_able_to(:manage, my_conference.program.cfp) }
       it{ should_not be_able_to(:manage, conference_public.program.cfp) }
+      it{ should_not be_able_to(:manage, my_schedule) }
+      it{ should_not be_able_to(:manage, other_schedule) }
+      it{ should_not be_able_to(:manage, my_event_schedule) }
+      it{ should_not be_able_to(:manage, other_event_schedule) }
       it{ should_not be_able_to(:manage, my_conference.venue) }
       it{ should_not be_able_to(:show, my_conference.venue) }
       it{ should_not be_able_to(:manage, conference_public.venue) }

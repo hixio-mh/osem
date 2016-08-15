@@ -16,9 +16,9 @@ class Event < ActiveRecord::Base
 
   has_many :events_registrations
   has_many :registrations, through: :events_registrations
+  has_many :event_schedules, dependent: :destroy
 
   belongs_to :track
-  belongs_to :room
   belongs_to :difficulty_level
   belongs_to :program
 
@@ -38,6 +38,8 @@ class Event < ActiveRecord::Base
   validate :max_attendees_no_more_than_room_size
 
   scope :confirmed, -> { where(state: 'confirmed') }
+  scope :canceled, -> { where(state: 'canceled') }
+  scope :withdrawn, -> { where(state: 'withdrawn') }
   scope :highlighted, -> { where(is_highlight: true) }
 
   state_machine initial: :new do
@@ -69,11 +71,11 @@ class Event < ActiveRecord::Base
   end
 
   ##
-  # Checkes if the event has a start_time and a room
+  # Checkes if the event has a start_time and a room for the selected schedule if there is any
   # ====Returns
   # * +true+ or +false+
   def scheduled?
-    room && start_time ? true : false
+    event_schedules.find_by(schedule_id: program.selected_schedule_id).present?
   end
 
   def registration_possible?
@@ -82,8 +84,24 @@ class Event < ActiveRecord::Base
     registrations.count < max_attendees
   end
 
-  def voted?(event, user)
-    event.votes.where('user_id = ?', user).first
+  ##
+  # Finds the rating of the user for the event
+  # ====Returns
+  # * +integer+ -> the rating of the user for the event
+  def user_rating(user)
+    (vote = votes.find_by(user: user)) ? vote.rating : 0
+  end
+
+  ##
+  # Checks if the event has votes
+  # If a user is provided, it checks if the event has votes by the user
+  # ====Returns
+  # * +true+ -> If the event has votes (optionally, by the user)
+  # * +false+ -> If the event does not have any votes (optionally, by the user)
+  def voted?(user=nil)
+    return votes.where(user: user).any? if user
+
+    votes.any?
   end
 
   def average_rating
@@ -97,9 +115,7 @@ class Event < ActiveRecord::Base
 
   def submitter
     result = event_users.where(event_role: 'submitter').first
-    if !result.nil?
-      result.user
-    else
+    if result.nil?
       user = nil
       # Perhaps the event_users haven't been saved, if this is a new proposal
       event_users.each do |u|
@@ -108,17 +124,9 @@ class Event < ActiveRecord::Base
         end
       end
       user
+    else
+      result.user
     end
-  end
-
-  def as_json(options)
-    json = super(options)
-
-    json[:room_guid] = room.try(:guid)
-    json[:track_color] = track.try(:color) || '#FFFFFF'
-    json[:length] = event_type.try(:length) || 25
-
-    json
   end
 
   def transition_possible?(transition)
@@ -224,10 +232,19 @@ class Event < ActiveRecord::Base
   end
 
   ##
-  # Returns end of the event
+  # Returns the room in which the event is scheduled
   #
-  def end_time
-    self.start_time + self.event_type.length.minutes
+  def room
+    # We use try(:selected_schedule_id) because this function is used for
+    # validations so program could not be present there
+    event_schedules.find_by(schedule_id: program.try(:selected_schedule_id)).try(:room)
+  end
+
+  ##
+  # Returns the start time at which this event is scheduled
+  #
+  def time
+    event_schedules.find_by(schedule_id: program.selected_schedule_id).try(:start_time)
   end
 
   private
@@ -256,7 +273,7 @@ class Event < ActiveRecord::Base
   def generate_guid
     loop do
       @guid = SecureRandom.urlsafe_base64
-      break if !self.class.where(guid: guid).any?
+      break unless self.class.where(guid: guid).any?
     end
     self.guid = @guid
   end

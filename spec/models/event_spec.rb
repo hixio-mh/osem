@@ -6,6 +6,7 @@ describe Event do
   let(:event) { create(:event, program: conference.program) }
   let(:new_event) { create(:event) }
   let(:user) { create(:user) }
+  let(:another_user) { create(:user) }
 
   describe 'association' do
     it { is_expected.to belong_to :program }
@@ -26,7 +27,10 @@ describe Event do
 
     describe 'max_attendees_no_more_than_room_size' do
       before :each do
-        event.room = create(:room, size: 3)
+        unless (venue = event.program.conference.venue)
+          venue = create(:venue, conference: event.program.conference)
+        end
+        create(:event_schedule, event: event, room: create(:room, venue: venue, size: 3))
         event.require_registration = true
       end
 
@@ -115,8 +119,7 @@ describe Event do
   describe '#scheduled?' do
     it { expect(event.scheduled?).to eq false }
     it 'returns true if the event is scheduled' do
-      event.room = create(:room)
-      event.start_time = conference.start_date.to_time
+      create(:event_schedule, event: event)
       expect(event.scheduled?).to eq true
     end
   end
@@ -166,14 +169,41 @@ describe Event do
     end
   end
 
-  describe '#voted?' do
-    it 'returns nil if the event has no votes' do
-      expect(event.voted?(event, user)).to eq nil
+  describe '#user_rating' do
+    it 'returns 0 if the event has no votes' do
+      expect(event.user_rating(user)).to eq 0
     end
 
-    it 'returns the first vote when the event has votes' do
-      vote = create(:vote, user: user, event: event)
-      expect(event.voted?(event, user)).to eq vote
+    it 'returns 0 if the event has no votes from that user' do
+      create(:vote, user: another_user, event: event)
+      expect(event.user_rating(user)).to eq 0
+    end
+
+    it 'returns the rating if the event has votes from that user' do
+      create(:vote, user: another_user, event: event, rating: 3)
+      create(:vote, user: user, event: event, rating: 2)
+      expect(event.user_rating(user)).to eq 2
+    end
+  end
+
+  describe '#voted?' do
+    it 'returns false if the event has no votes' do
+      expect(event.voted?).to eq false
+    end
+
+    it 'returns false if the event has no votes by that user' do
+      create(:vote, user: another_user, event: event)
+      expect(event.voted?(user)).to eq false
+    end
+
+    it 'returns true when the event has votes' do
+      create(:vote, user: another_user, event: event)
+      expect(event.voted?).to eq true
+    end
+
+    it 'returns true when the event has votes by that user' do
+      create(:vote, user: user, event: event)
+      expect(event.voted?(user)).to eq true
     end
   end
 
@@ -226,27 +256,6 @@ describe Event do
       expect(event.abstract_word_count).to eq(0)
       event.abstract = ''
       expect(event.abstract_word_count).to eq(0)
-    end
-  end
-
-  describe '#as_json' do
-    it 'adds the event\'s room_guid, track_color and length' do
-      event.room = create(:room)
-      event.track = create(:track, color: '#efefef')
-      json_hash = event.as_json(nil)
-
-      expect(json_hash[:room_guid]).to eq(event.room.guid)
-      expect(json_hash[:track_color]).to eq('#EFEFEF')
-      expect(json_hash[:length]).to eq(30)
-    end
-
-    it 'uses correct default values for room_guid, track_color and length' do
-      event.event_type = nil
-      json_hash = event.as_json(nil)
-
-      expect(json_hash[:room_guid]).to be_nil
-      expect(json_hash[:track_color]).to eq('#FFFFFF')
-      expect(json_hash[:length]).to eq(25)
     end
   end
 

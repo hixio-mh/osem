@@ -551,7 +551,7 @@ class Conference < ActiveRecord::Base
         result[state.name] = count
       end
 
-      if !conference.events_per_week
+      unless conference.events_per_week
         conference.events_per_week = {}
       end
 
@@ -607,6 +607,21 @@ class Conference < ActiveRecord::Base
       types: (program.event_types.count + 101)
     }
     next_color(start_index[collection])
+  end
+
+  # Returns the current day if it is a day of the schedule or nil otherwise
+  def current_conference_day
+    day = Time.find_zone(timezone).today
+    day if (start_date..end_date).cover? day
+  end
+
+  # Returns the number of hours since the conference start hour (9) to the
+  # current hour, in case that the current hour is beetween the start and the
+  # end hour (20). Otherwise, returns 0
+  def hours_from_start_time(start_hour, end_hour)
+    current_time = Time.find_zone(timezone).now
+    current_hour = current_time.strftime('%H').to_i
+    (start_hour..(end_hour-1)).cover?(current_hour) ? current_hour - start_hour : 0
   end
 
   private
@@ -677,7 +692,7 @@ class Conference < ActiveRecord::Base
     events_per_week.each do |week, values|
       values.each do |state, value|
         if [:confirmed, :unconfirmed].include?(state)
-          if !result[state.to_s.capitalize]
+          unless result[state.to_s.capitalize]
             result[state.to_s.capitalize] = {}
           end
           result[state.to_s.capitalize][week.strftime('%W').to_i] = value
@@ -753,7 +768,7 @@ class Conference < ActiveRecord::Base
   def assert_keys_are_continuously(hash)
     keys = hash.keys
     (keys.min..keys.max).each do |key|
-      if !hash[key]
+      unless hash[key]
         hash[key] = 0
       end
     end
@@ -989,7 +1004,7 @@ class Conference < ActiveRecord::Base
   # Adds a random color to the conference
   #
   def add_color
-    if !color
+    unless color
       self.color = get_color
     end
   end

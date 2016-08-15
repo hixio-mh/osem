@@ -106,31 +106,34 @@
           %td
             = @event.language
 
-      - if !@event.room.nil?
+      - unless @event.room.nil?
         %tr
           %td
             %b Room
           %td
             = @event.room.name
-      - if !@event.start_time.nil?
+      - unless @event.time.nil?
         %tr
           %td
             %b Scheduled time
           %td
-            = @event.start_time
+            = @event.time
       %tr
         %td
           %b Submitter
         %td
-          = link_to @event.submitter.name, admin_user_path(@event.submitter)
-          (
-          = link_to @event.submitter.email, "mailto: #{@event.submitter.email}"
-          )
+          - if @program.show_voting?
+            = link_to @event.submitter.name, admin_user_path(@event.submitter)
+            (
+            = link_to @event.submitter.email, "mailto: #{@event.submitter.email}"
+            )
+          - else
+            %i Hidden
       %tr
         %td
           %b Biography
         %td
-          = simple_format(@event.submitter.biography)
+          = markdown(@event.submitter.biography)
       %tr
         %td
           %b Submitted on
@@ -142,7 +145,7 @@
       %tr
         %td
           %b Abstract
-        %td= simple_format(@event.abstract)
+        %td= markdown(@event.abstract)
       %tr
         %td
           %b Description
