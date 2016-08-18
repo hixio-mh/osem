@@ -22,3 +22,8 @@
 every :sunday, at: '23:55 pm' do
   runner 'Conference.write_event_distribution_to_db'
 end
+
+# Run queued delayed jobs
+every 1.minute do
+  rake 'jobs:workoff'
+end
