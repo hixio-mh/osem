@@ -6,6 +6,12 @@ end
 
 class User < ActiveRecord::Base
   rolify
+  has_many :users_roles
+  has_many :roles, through: :users_roles, dependent: :destroy
+
+  has_paper_trail on: [:create, :update], ignore: [:sign_in_count, :remember_created_at, :current_sign_in_at, :last_sign_in_at, :current_sign_in_ip, :last_sign_in_ip, :unconfirmed_email,
+                                                   :avatar_content_type, :avatar_file_size, :avatar_updated_at, :updated_at, :confirmation_sent_at, :confirmation_token, :reset_password_token]
+
   include Gravtastic
   gravtastic size: 32
 
@@ -38,6 +44,7 @@ class User < ActiveRecord::Base
   has_many :registrations, dependent: :destroy
   has_many :events_registrations, through: :registrations
   has_many :ticket_purchases, dependent: :destroy
+  has_many :payments, dependent: :destroy
   has_many :tickets, through: :ticket_purchases, source: :ticket
   has_many :votes, dependent: :destroy
   has_many :voted_events, through: :votes, source: :events
@@ -72,7 +79,7 @@ class User < ActiveRecord::Base
   end
 
   def name
-    self[:name] || username
+    self[:name].blank? ? username : self[:name]
   end
 
   ##

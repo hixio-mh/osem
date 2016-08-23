@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160704092023) do
+ActiveRecord::Schema.define(version: 20160815140302) do
 
   create_table "ahoy_events", force: :cascade do |t|
     t.uuid     "visit_id",   limit: 16
@@ -185,6 +185,7 @@ ActiveRecord::Schema.define(version: 20160704092023) do
     t.datetime "updated_at",  null: false
   end
 
+  add_index "event_schedules", ["event_id", "schedule_id"], name: "index_event_schedules_on_event_id_and_schedule_id", unique: true
   add_index "event_schedules", ["event_id"], name: "index_event_schedules_on_event_id"
   add_index "event_schedules", ["room_id"], name: "index_event_schedules_on_room_id"
   add_index "event_schedules", ["schedule_id"], name: "index_event_schedules_on_schedule_id"
@@ -261,6 +262,17 @@ ActiveRecord::Schema.define(version: 20160704092023) do
     t.integer  "user_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.string   "last4"
+    t.integer  "amount"
+    t.string   "authorization_code"
+    t.integer  "status",             default: 0, null: false
+    t.integer  "user_id",                        null: false
+    t.integer  "conference_id",                  null: false
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
   end
 
   create_table "programs", force: :cascade do |t|
@@ -429,6 +441,7 @@ ActiveRecord::Schema.define(version: 20160704092023) do
     t.datetime "created_at"
     t.integer  "quantity",      default: 1
     t.integer  "user_id"
+    t.integer  "payment_id"
   end
 
   create_table "tickets", force: :cascade do |t|
@@ -489,7 +502,7 @@ ActiveRecord::Schema.define(version: 20160704092023) do
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   add_index "users", ["username"], name: "index_users_on_username", unique: true
 
-  create_table "users_roles", id: false, force: :cascade do |t|
+  create_table "users_roles", force: :cascade do |t|
     t.integer "role_id"
     t.integer "user_id"
   end
@@ -535,6 +548,7 @@ ActiveRecord::Schema.define(version: 20160704092023) do
     t.text     "object"
     t.text     "object_changes"
     t.datetime "created_at"
+    t.integer  "conference_id"
   end
 
   add_index "versions", ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"

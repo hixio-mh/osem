@@ -81,6 +81,7 @@ class Ability
 
     can :index, Ticket
     can :manage, TicketPurchase, user_id: user.id
+    can [:new, :create], Payment, user_id: user.id
 
     can [:create, :destroy], Subscription, user_id: user.id
 
@@ -113,6 +114,14 @@ class Ability
     cannot [:edit, :update, :destroy], Question, global: true
     # for admins
     can :manage, :all if user.is_admin
+
+    cannot :revert_object, PaperTrail::Version do |version|
+      (version.event == 'create' && %w(Conference User Event).include?(version.item_type))
+    end
+
+    cannot :revert_attribute, PaperTrail::Version do |version|
+      version.event != 'update' || version.item.nil?
+    end
 
     cannot :destroy, Program
     # Do not delete venue, when there are rooms being used
@@ -168,6 +177,10 @@ class Ability
     can [:edit, :update, :toggle_user], Role do |role|
       role.resource_type == 'Conference' && (conf_ids_for_organizer.include? role.resource_id)
     end
+
+    can [:index, :revert_object, :revert_attribute], PaperTrail::Version do |version|
+      version.item_type == 'User' || (conf_ids_for_organizer.include? version.conference_id)
+    end
   end
 
   def signed_in_with_cfp_role(user)
@@ -197,6 +210,12 @@ class Ability
     can :toggle_user, Role do |role|
       role.resource_type == 'Conference' && role.name == 'cfp' &&
       (Conference.with_role(:cfp, user).pluck(:id).include? role.resource_id)
+    end
+
+    can [:index, :revert_object, :revert_attribute], PaperTrail::Version, item_type: 'Event', conference_id: conf_ids_for_cfp
+    can [:index, :revert_object, :revert_attribute], PaperTrail::Version do |version|
+      version.item_type == 'Commercial' && conf_ids_for_cfp.include?(version.conference_id) &&
+      (version.object.to_s.include?('Event') || version.object_changes.to_s.include?('Event'))
     end
   end
 

@@ -1,6 +1,8 @@
 class Splashpage < ActiveRecord::Base
   belongs_to :conference
 
+  has_paper_trail ignore: [:updated_at], meta: { conference_id: :conference_id }
+
   mount_uploader :picture, PictureUploader, mount_on: :banner_file_name
 
   validate :single_show_by_default, if: :show_by_default
