@@ -45,7 +45,7 @@
         (#{voting_open_or_close(@program)})
 
   - if @program.show_voting?
-    - if @ratings && @ratings.length > 0
+    - if @ratings.length > 0
       - @ratings.each do |rate|
         - unless rate.user_id == current_user.id
           %tr
