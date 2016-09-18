@@ -26,15 +26,13 @@
         .col-md-12
           = image_tag @speaker.gravatar_url(:size => 200), :class => "img-responsive img-rounded"
         .col-md-12
-          %h3
-            by
-            = link_to @speaker.name, user_path(@speaker.id)
-            = "(#{@speaker.email})"
-            - if @speaker.affiliation?
-              %br
-              %span.muted
-                from
-                = @speaker.affiliation
+          by
+          = link_to @speaker.name, user_path(@speaker.id)
+          - if @speaker.affiliation?
+            %br
+            %span.muted
+              from
+              = @speaker.affiliation
           -if @speaker.biography?
             = markdown(@speaker.biography)
     .col-md-9
@@ -80,21 +78,24 @@
           .col-md-12
             %dt Conference:
             %dd= @event.program.conference.title
-          .col-md-12
-            %dt Language:
-            %dd= @event.language if @event.language
-          .col-md-12
-            %dt Track:
-            %dd
-              - if @event.track
-                %span.label{:style =>"background-color: #{@event.track.color}; color: #{ contrast_color(@event.track.color) }"}
-                  = @event.track.name
-          .col-md-12
-            %dt Difficulty:
-            %dd
-              - if @event.difficulty_level
-                %span.label{:style =>"background-color: #{@event.difficulty_level.color}; color: #{ contrast_color(@event.difficulty_level.color) };"}
-                  = @event.difficulty_level.title
+          - if @event.language
+            .col-md-12
+              %dt Language:
+              %dd= @event.language if @event.language
+          - if @event.track
+            .col-md-12
+              %dt Track:
+              %dd
+                - if @event.track
+                  %span.label{:style =>"background-color: #{@event.track.color}; color: #{ contrast_color(@event.track.color) }"}
+                    = @event.track.name
+          - if @event.difficulty_level
+            .col-md-12
+              %dt Difficulty:
+              %dd
+                - if @event.difficulty_level
+                  %span.label{:style =>"background-color: #{@event.difficulty_level.color}; color: #{ contrast_color(@event.difficulty_level.color) };"}
+                    = @event.difficulty_level.title
 
           - if @event.require_registration
             .col-md-12
