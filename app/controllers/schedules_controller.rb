@@ -5,7 +5,7 @@ class SchedulesController < ApplicationController
   load_resource :program, through: :conference, singleton: true, except: :index
 
   def show
-    @rooms = @conference.venue.rooms if @conference.venue
+    @rooms = @conference.venue.rooms.order(:name) if @conference.venue
     schedules = @program.selected_event_schedules
     unless schedules
       redirect_to events_conference_schedule_path(@conference.short_title)
@@ -15,7 +15,7 @@ class SchedulesController < ApplicationController
     @dates = @conference.start_date..@conference.end_date
     @step_minutes = EventType::LENGTH_STEP.minutes
     @conf_start = 9
-    conf_end = 20
+    conf_end = 18
     @conf_period = conf_end - @conf_start
 
     # the schedule takes you to today if it is a date of the schedule
