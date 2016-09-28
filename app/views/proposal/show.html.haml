@@ -34,7 +34,8 @@
               from
               = @speaker.affiliation
           -if @speaker.biography?
-            = markdown(@speaker.biography)
+            .biography
+              = markdown(@speaker.biography)
     .col-md-9
       .row
         .col-md-12

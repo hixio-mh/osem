@@ -102,6 +102,11 @@ background-image: -webkit-gradient(
 .speakerinfo {
     font-size: 20px;
     margin-top: 20px;
+
+    .biography {
+      margin-top: 10px;
+      font-size: 12px;
+    }
 }
 
 .schedule-title, .schedule-subtitle, .schedule-speaker, .schedule-track {
