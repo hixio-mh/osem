@@ -30,7 +30,13 @@ We are using [Vagrant](https://www.vagrantup.com/) to create our development env
     vagrant up
     ```
 
-5. Start your OSEM rails app:
+5. Deploy the initial database migration:
+
+    ```
+    vagrant exec bundle exec rake db:migrate
+    ```
+
+6. Start your OSEM rails app:
 
     ```
     vagrant exec rails server -b 0.0.0.0
