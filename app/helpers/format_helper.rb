@@ -189,7 +189,7 @@ module FormatHelper
   end
 
   def markdown_hint(text='')
-    markdown("#{text} Please look at #{link_to '**Markdown Syntax**', 'https://daringfireball.net/projects/markdown/syntax', target: '_blank'} to format your text")
+    markdown("#{text} Please look at **[Markdown Syntax](https://daringfireball.net/projects/markdown/syntax)** to format your text")
   end
 
   def quantity_left_of(resource)
