@@ -33,7 +33,7 @@ end
 desc 'Deploys the current version to the server.'
 task deploy: :environment do
   on :prepare do
-    command "cd #{fetch(:deploy_to)}/current && RAILS_ENV=production bundle exec bin/delayed_job stop"
+    command "cd #{fetch(:deploy_to)}/current && RAILS_ENV=production bin/delayed_job stop"
   end
 
   deploy do
@@ -46,7 +46,7 @@ task deploy: :environment do
 
     on :launch do
       command "sudo /etc/init.d/apache2 restart"
-      command "cd #{fetch(:deploy_to)}/current && RAILS_ENV=production bundle exec bin/delayed_job start"
+      command "cd #{fetch(:deploy_to)}/current && RAILS_ENV=production bin/delayed_job start || true"
     end
 
     invoke :'deploy:cleanup'
