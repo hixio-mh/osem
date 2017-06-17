@@ -46,7 +46,7 @@ task deploy: :environment do
 
     on :launch do
       command "sudo /etc/init.d/apache2 restart"
-      command "cd #{fetch(:deploy_to)}/current && RAILS_ENV=production bin/delayed_job start || true"
+      #command "cd #{fetch(:deploy_to)}/current && RAILS_ENV=production bin/delayed_job start"
     end
 
     invoke :'deploy:cleanup'
