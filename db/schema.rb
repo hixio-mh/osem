@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170531094819) do
+ActiveRecord::Schema.define(version: 20170614025428) do
 
   create_table "ahoy_events", force: :cascade do |t|
     t.uuid     "visit_id",   limit: 16
@@ -237,6 +237,8 @@ ActiveRecord::Schema.define(version: 20170531094819) do
     t.boolean  "is_highlight",                 default: false
     t.integer  "program_id"
     t.integer  "max_attendees"
+    t.boolean  "diversity",                    default: false
+    t.boolean  "first_time",                   default: false
   end
 
   create_table "events_registrations", force: :cascade do |t|
