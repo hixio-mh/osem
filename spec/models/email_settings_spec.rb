@@ -3,8 +3,7 @@ require 'spec_helper'
 describe EmailSettings do
   let(:conference) { create(:conference, short_title: 'goto', start_date: Date.new(2014, 05, 01), end_date: Date.new(2014, 05, 06)) }
   let(:user) { create(:user, username: 'johnd', email: 'john@doe.com', name: 'John Doe') }
-  let(:event_user) { create(:submitter, user: user) }
-  let(:event) { create(:event, program: conference.program, title: 'Talk about talks', event_users: [event_user]) }
+  let(:event) { create(:event, program: conference.program, title: 'Talk about talks', submitter: user) }
   let(:expected_hash) do
     {
       'email' => 'john@doe.com',
@@ -12,9 +11,9 @@ describe EmailSettings do
       'conference' => conference.title,
       'conference_start_date' => Date.new(2014, 05, 01),
       'conference_end_date' => Date.new(2014, 05, 06),
-      'registrationlink' => 'http://localhost:3000/conference/goto/register',
-      'conference_splash_link' => 'http://localhost:3000/conference/goto',
-      'schedule_link' => 'http://localhost:3000/conference/goto/schedule',
+      'registrationlink' => 'http://localhost:3000/conferences/goto/register',
+      'conference_splash_link' => 'http://localhost:3000/conferences/goto',
+      'schedule_link' => 'http://localhost:3000/conferences/goto/schedule',
       'cfp_end_date' => 'Unknown',
       'cfp_start_date' => 'Unknown',
       'venue' => 'Unknown',
@@ -87,7 +86,7 @@ describe EmailSettings do
 
     context 'conference has event' do
       before do
-        event_hash = { 'eventtitle' => 'Talk about talks', 'proposalslink' => 'http://localhost:3000/conference/goto/program/proposal' }
+        event_hash = { 'eventtitle' => 'Talk about talks', 'proposalslink' => 'http://localhost:3000/conferences/goto/program/proposals' }
         expected_hash.merge!(event_hash)
       end
 

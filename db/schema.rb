@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160815140302) do
+ActiveRecord::Schema.define(version: 20170531094819) do
 
   create_table "ahoy_events", force: :cascade do |t|
     t.uuid     "visit_id",   limit: 16
@@ -98,7 +98,12 @@ ActiveRecord::Schema.define(version: 20160815140302) do
     t.text     "description"
     t.integer  "registration_limit", default: 0
     t.string   "picture"
+    t.integer  "start_hour",         default: 9
+    t.integer  "end_hour",           default: 20
+    t.integer  "organization_id"
   end
+
+  add_index "conferences", ["organization_id"], name: "index_conferences_on_organization_id"
 
   create_table "conferences_questions", id: false, force: :cascade do |t|
     t.integer "conference_id"
@@ -264,6 +269,12 @@ ActiveRecord::Schema.define(version: 20160815140302) do
     t.datetime "updated_at"
   end
 
+  create_table "organizations", force: :cascade do |t|
+    t.string "name",        null: false
+    t.text   "description"
+    t.string "picture"
+  end
+
   create_table "payments", force: :cascade do |t|
     t.string   "last4"
     t.integer  "amount"
@@ -287,6 +298,7 @@ ActiveRecord::Schema.define(version: 20160815140302) do
     t.datetime "voting_start_date"
     t.datetime "voting_end_date"
     t.integer  "selected_schedule_id"
+    t.integer  "schedule_interval",    default: 15,    null: false
   end
 
   add_index "programs", ["selected_schedule_id"], name: "index_programs_on_selected_schedule_id"
@@ -342,6 +354,14 @@ ActiveRecord::Schema.define(version: 20160815140302) do
   create_table "registrations_vchoices", id: false, force: :cascade do |t|
     t.integer "registration_id"
     t.integer "vchoice_id"
+  end
+
+  create_table "resources", force: :cascade do |t|
+    t.string  "name"
+    t.text    "description"
+    t.integer "quantity"
+    t.integer "used",          default: 0
+    t.integer "conference_id"
   end
 
   create_table "roles", force: :cascade do |t|
@@ -442,6 +462,7 @@ ActiveRecord::Schema.define(version: 20160815140302) do
     t.integer  "quantity",      default: 1
     t.integer  "user_id"
     t.integer  "payment_id"
+    t.integer  "week"
   end
 
   create_table "tickets", force: :cascade do |t|
@@ -480,7 +501,7 @@ ActiveRecord::Schema.define(version: 20160815140302) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "name"
-    t.boolean  "email_public"
+    t.boolean  "email_public",           default: true
     t.text     "biography"
     t.string   "nickname"
     t.string   "affiliation"

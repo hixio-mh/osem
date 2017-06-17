@@ -15,17 +15,19 @@ Osem::Application.routes.draw do
     mount LetterOpenerWeb::Engine, at: "/letter_opener"
   end
 
-  resources :users, except: [:new, :index, :create, :destroy]
+  resources :users, except: [:new, :index, :create, :destroy] do
+    resources :openids, only: :destroy
+  end
 
   namespace :admin do
-    resources :users
+    resources :organizations
     resources :users do
       member do
         patch :toggle_confirmation
       end
     end
     resources :comments, only: [:index]
-    resources :conference do
+    resources :conferences do
       resource :contact, except: [:index, :new, :create, :show, :destroy]
       resources :schedules, only: [:index, :create, :show, :update, :destroy]
       resources :event_schedules, only: [:create, :update, :destroy]
@@ -69,8 +71,10 @@ Osem::Application.routes.draw do
             get :vote
           end
         end
+        resources :reports, only: :index
       end
 
+      resources :resources
       resources :tickets
       resources :sponsors, except: [:show]
       resources :lodgings, except: [:show]
@@ -101,18 +105,18 @@ Osem::Application.routes.draw do
     get '/revision_history/:id/revert_object' => 'versions#revert_object', as: 'revision_history_revert_object'
     get '/revision_history/:id/revert_attribute' => 'versions#revert_attribute', as: 'revision_history_revert_attribute'
   end
-
-  resources :conference, only: [:index, :show] do
+  resources :organizations, only: [:index]
+  resources :conferences, only: [:index, :show] do
     resource :program, only: [] do
-      resources :proposal, except: :destroy do
+      resources :proposals, except: :destroy do
         get 'commercials/render_commercial' => 'commercials#render_commercial'
         resources :commercials, only: [:create, :update, :destroy]
         member do
           get :registrations
-          patch '/withdraw' => 'proposal#withdraw'
+          patch '/withdraw' => 'proposals#withdraw'
           get :registrations
-          patch '/confirm' => 'proposal#confirm'
-          patch '/restart' => 'proposal#restart'
+          patch '/confirm' => 'proposals#confirm'
+          patch '/restart' => 'proposals#restart'
         end
       end
     end
@@ -145,7 +149,7 @@ Osem::Application.routes.draw do
     end
   end
 
-  get '/admin' => redirect('/admin/conference')
+  get '/admin' => redirect('/admin/conferences')
 
-  root to: 'conference#index', via: [:get, :options]
+  root to: 'conferences#index', via: [:get, :options]
 end

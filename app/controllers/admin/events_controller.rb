@@ -5,7 +5,7 @@ module Admin
     load_and_authorize_resource :event, through: :program
     load_and_authorize_resource :events_registration, only: :toggle_attendance
 
-    before_action :get_event, except: [:index, :create]
+    before_action :get_event, except: [:index, :create, :new]
 
     # FIXME: The timezome should only be applied on output, otherwise
     # you get lost in timezone conversions...
@@ -23,11 +23,22 @@ module Admin
       @tracks_distribution_confirmed = @conference.tracks_distribution(:confirmed)
       @event_distribution = @conference.event_distribution
       @scheduled_event_distribution = @conference.scheduled_event_distribution
+      @file_name = "events_for_#{@conference.short_title}"
+      @event_export_option = params[:event_export_option]
 
       respond_to do |format|
         format.html
         # Explicity call #to_json to avoid the use of EventSerializer
         format.json { render json: Event.where(state: :confirmed, program: @program).to_json }
+        format.xlsx do
+          response.headers['Content-Disposition'] = "attachment; filename=\"#{@file_name}.xlsx\""
+          render 'events'
+        end
+        format.pdf {render 'events'}
+        format.csv do
+          response.headers['Content-Disposition'] = "attachment; filename=\"#{@file_name}.csv\""
+          render 'events'
+        end
       end
     end
 
@@ -39,8 +50,10 @@ module Admin
       @ratings = @event.votes.includes(:user)
       @difficulty_levels = @program.difficulty_levels
       @versions = @event.versions |
-       PaperTrail::Version.where(item_type: 'Commercial').where_object(commercialable_id: @event.id, commercialable_type: 'Event') |
-       PaperTrail::Version.where(item_type: 'Commercial').where_object_changes(commercialable_id: @event.id, commercialable_type: 'Event')
+       PaperTrail::Version.where(item_type: 'Commercial').where('object LIKE ?', "%commercialable_id: #{@event.id}\ncommercialable_type: Event%") |
+       PaperTrail::Version.where(item_type: 'Commercial').where('object_changes LIKE ?', "%commercialable_id:\n- \n- #{@event.id}\ncommercialable_type:\n- \n- Event%") |
+       PaperTrail::Version.where(item_type: 'Vote').where('object_changes LIKE ?', "%\nevent_id:\n- \n- #{@event.id}\n%") |
+       PaperTrail::Version.where(item_type: 'Vote').where('object LIKE ?', "%\nevent_id: #{@event.id}\n%")
     end
 
     def edit
@@ -66,6 +79,7 @@ module Admin
     end
 
     def update
+      @languages = @program.languages_list
       if @event.update_attributes(event_params)
 
         if request.xhr?
@@ -76,12 +90,29 @@ module Admin
         end
       else
         @url = admin_conference_program_event_path(@conference.short_title, @event)
-        flash[:error] = 'Update not successful. ' + @event.errors.full_messages.to_sentence
+        flash.now[:error] = 'Update not successful. ' + @event.errors.full_messages.to_sentence
         render :edit
       end
     end
 
-    def create; end
+    def create
+      @url = admin_conference_program_events_path(@conference.short_title, @event)
+      @languages = @program.languages_list
+      @event.submitter = current_user
+
+      if @event.save
+        ahoy.track 'Event submission', title: 'New submission'
+        redirect_to admin_conference_program_events_path(@conference.short_title), notice: 'Event was successfully submitted.'
+      else
+        flash[:error] = "Could not submit proposal: #{@event.errors.full_messages.join(', ')}"
+        render action: 'new'
+      end
+    end
+
+    def new
+      @url = admin_conference_program_events_path(@conference.short_title, @event)
+      @languages = @program.languages_list
+    end
 
     def accept
       send_mail = @event.program.conference.email_settings.send_on_accepted
@@ -148,7 +179,8 @@ module Admin
                                     # Set only in admin/events controller
                                     :track_id, :state, :language, :is_highlight, :max_attendees,
                                     # Not used anymore?
-                                    :proposal_additional_speakers, :user, :users_attributes)
+                                    :proposal_additional_speakers, :user, :users_attributes,
+                                    speaker_ids: [])
     end
 
     def comment_params

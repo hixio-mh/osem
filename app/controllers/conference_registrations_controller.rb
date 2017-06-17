@@ -6,22 +6,21 @@ class ConferenceRegistrationsController < ApplicationController
 
   def new
     @registration = Registration.new(conference_id: @conference.id)
-    authorize! :new, @registration, message: "Sorry, you can not register for #{@conference.title}. Registration limit exceeded or the registration is not open."
 
     # Redirect to registration edit when user is already registered
     if @conference.user_registered?(current_user)
+      # Authorization needs to happen in every action before the return statement
+      # We authorize the #edit action, since we redirect to it
+      authorize! :edit, current_user.registrations.find_by(conference_id: @conference.id)
       redirect_to edit_conference_conference_registration_path(@conference.short_title)
-      return
-    # ichain does not allow us to create users during registration
-    elsif (ENV['OSEM_ICHAIN_ENABLED'] == 'true') && !current_user
-      redirect_to root_path, alert: 'You need to sign in or sign up before continuing.'
       return
     end
 
-    # avoid openid sign_in to redirect to register/new when the sign_in user had already a registration
-    if current_user && @conference.user_registered?(current_user)
-      redirect_to edit_conference_conference_registration_path(@conference.short_title)
+    if !@conference.registration_open? || @conference.registration_limit_exceeded?
+      message = "Sorry, you can not register for #{@conference.title}. Registration limit exceeded or the registration is not open."
+      @ignore_not_signed_in_user = true
     end
+    authorize! :new, @registration, message: message
 
     # @user variable needs to be set so that _sign_up_form_embedded works properly
     @user = @registration.build_user
@@ -66,7 +65,7 @@ class ConferenceRegistrationsController < ApplicationController
                     notice: 'You are now registered and will be receiving E-Mail notifications.'
       end
     else
-      flash[:error] = "Could not create your registration for #{@conference.title}: "\
+      flash.now[:error] = "Could not create your registration for #{@conference.title}: "\
                         "#{@registration.errors.full_messages.join('. ')}."
       render :new
     end
@@ -77,7 +76,7 @@ class ConferenceRegistrationsController < ApplicationController
       redirect_to  conference_conference_registration_path(@conference.short_title),
                    notice: 'Registration was successfully updated.'
     else
-      flash[:error] = "Could not update your registration for #{@conference.title}: "\
+      flash.now[:error] = "Could not update your registration for #{@conference.title}: "\
                         "#{@registration.errors.full_messages.join('. ')}."
       render :edit
     end
@@ -109,8 +108,8 @@ class ConferenceRegistrationsController < ApplicationController
   end
 
   def registration_params
-    params.require(:registration).
-        permit(
+    params.require(:registration)
+        .permit(
           :conference_id, :arrival, :departure,
           :volunteer,
           vchoice_ids: [], qanswer_ids: [],

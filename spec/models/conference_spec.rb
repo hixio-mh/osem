@@ -743,8 +743,8 @@ describe Conference do
       c = create(:conference, start_date: Time.now - 1.year, end_date: Time.now - 360.days)
       result = [a, b, c]
 
-      expect(Conference.get_conferences_without_active_for_dashboard([subject])).
-          to match_array(result)
+      expect(Conference.get_conferences_without_active_for_dashboard([subject]))
+          .to match_array(result)
     end
 
     it 'returns all conferences if there are no active conferences' do
@@ -775,6 +775,28 @@ describe Conference do
       result.push(short_title: 'Confirmed', color: 'green')
       result.push(short_title: 'Unconfirmed', color: 'orange')
       expect(Conference.get_event_state_line_colors).to eq(result)
+    end
+  end
+
+  describe '#scheduled_event_distribution' do
+    let(:conference) { create(:conference) }
+    let(:confirmed_unscheduled_event) { create(:event, program: conference.program, state: 'confirmed') }
+    let(:confirmed_scheduled_event) { create(:event_scheduled, program: conference.program) }
+
+    it '#scheduled_event_distribution does calculate correct values with events' do
+      confirmed_unscheduled_event
+      confirmed_scheduled_event
+      result = {}
+      result['Scheduled'] = { 'value' => 1, 'color' => 'green' }
+      result['Unscheduled'] = { 'value' => 1, 'color' => 'red' }
+      expect(conference.scheduled_event_distribution).to eq(result)
+    end
+
+    it '#scheduled_event_distribution does calculate correct values with no events' do
+      result = {}
+      result['Scheduled'] = { 'value' => 0, 'color' => 'green' }
+      result['Unscheduled'] = { 'value' => 0, 'color' => 'red' }
+      expect(conference.scheduled_event_distribution).to eq(result)
     end
   end
 
@@ -853,7 +875,7 @@ describe Conference do
       conference = create(:conference)
       event = create(:event, program: conference.program)
       event.reject!(@options)
-      result = { 'Rejected' =>  { 'value' => 1, 'color' => '#FF0000' } }
+      result = { 'Rejected' => { 'value' => 1, 'color' => '#FF0000' } }
       expect(conference.event_distribution).to eq(result)
     end
 
@@ -863,7 +885,7 @@ describe Conference do
       event = create(:event, program: conference.program)
       event.accept!(@options)
       event.confirm!
-      result = { 'Confirmed' =>  { 'value' => 1, 'color' => '#00FF00' } }
+      result = { 'Confirmed' => { 'value' => 1, 'color' => '#00FF00' } }
       expect(conference.event_distribution).to eq(result)
     end
 
@@ -872,7 +894,7 @@ describe Conference do
       event = create(:event, program: conference.program)
       event.accept!(@options)
       event.cancel!
-      result = { 'Canceled' =>  { 'value' => 1, 'color' => '#848484' } }
+      result = { 'Canceled' => { 'value' => 1, 'color' => '#848484' } }
       expect(conference.event_distribution).to eq(result)
     end
 
@@ -1545,6 +1567,14 @@ describe Conference do
       should validate_presence_of(:end_date)
     end
 
+    it 'is not valid without a start date' do
+      should validate_presence_of(:start_hour)
+    end
+
+    it 'is not valid without an end date' do
+      should validate_presence_of(:end_hour)
+    end
+
     it 'is not valid with a duplicate short title' do
       should validate_uniqueness_of(:short_title)
     end
@@ -1572,6 +1602,21 @@ describe Conference do
       end
     end
 
+    describe 'valid_times_range?' do
+
+      it 'is not valid if start hour is lower than 0' do
+        expect(subject.start_hour).to be >= 0
+      end
+
+      it 'is not valid if end hour is lower or equal than start hour' do
+        expect(subject.start_hour).to be < subject.end_hour
+      end
+
+      it 'is not valid if end hour is greater than 24' do
+        expect(subject.end_hour).to be <= 24
+      end
+    end
+
     describe 'before create callbacks' do
 
       it 'has an email setting after creation' do
@@ -1581,6 +1626,36 @@ describe Conference do
       it 'has a guid after creation' do
         expect(subject.guid).not_to be_nil
       end
+    end
+  end
+
+  describe 'after_create' do
+    let(:conference) { create(:conference) }
+
+    it 'calls back to create free ticket' do
+      conference.save
+      conference.run_callbacks :create
+      free_ticket = conference.tickets.first
+      expect(free_ticket.price_cents).to eq(0)
+    end
+  end
+
+  describe 'after_update' do
+    let(:conference) { create(:conference) }
+    let(:scheduled_event_before_conference) { create(:event_scheduled, program: conference.program, hour: conference.start_date + conference.start_hour.hours) }
+    let(:scheduled_event_after_conference) { create(:event_scheduled, program: conference.program, hour: conference.start_date + conference.end_hour.hours - 1.hour) }
+    let!(:scheduled_event_during_conference) { create(:event_scheduled, program: conference.program, hour: conference.start_date + conference.start_hour.hours + 3.hours) }
+
+    it 'delete event schedules that are not in hour ranges, when conference start hour is updated' do
+      scheduled_event_before_conference
+      conference.start_hour = conference.start_hour + 1
+      expect{ conference.save }.to change{ EventSchedule.count }.from(2).to(1)
+    end
+
+    it 'delete event schedules that are not in hour ranges, when conference end hour is updated' do
+      scheduled_event_after_conference
+      conference.end_hour = conference.end_hour - 2
+      expect{ conference.save }.to change{ EventSchedule.count }.from(2).to(1)
     end
   end
 end

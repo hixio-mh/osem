@@ -17,7 +17,7 @@
           %b Type
         %td
           .dropdown
-            = link_to '#', class: 'dropdown-toggle', id: 'type-dropdown' do
+            = link_to '#', class: 'dropdown-toggle', id: 'type-dropdown', 'data-toggle' => 'dropdown' do
               - if @event.event_type.nil?
                 Event Type
               - else
@@ -35,7 +35,7 @@
           %b Highlight
         %td
           = check_box_tag @conference.short_title, @event.id, @event.is_highlight,
-            method: :patch, url: "/admin/conference/#{@conference.short_title}/program/events/#{@event.id}?event[is_highlight]=",
+            method: :patch, url: "/admin/conferences/#{@conference.short_title}/program/events/#{@event.id}?event[is_highlight]=",
             class: 'switch-checkbox', data: { size: 'small',
                                               off_color: 'warning',
                                               on_text: 'Yes',
@@ -46,7 +46,7 @@
           %b State
         %td
           .dropdown
-            = link_to '#', class: 'dropdown-toggle' do
+            = link_to '#', class: 'dropdown-toggle', 'data-toggle' => 'dropdown' do
               = @event.state.humanize
               <b class='caret'></b>
             %ul.dropdown-menu
@@ -56,7 +56,7 @@
           %b Track
         %td
           .dropdown
-            = link_to '#', class: 'dropdown-toggle', id: 'track-dropdown' do
+            = link_to '#', class: 'dropdown-toggle', id: 'track-dropdown', 'data-toggle' => 'dropdown' do
               - if @event.track.nil?
                 Track
               - else
@@ -74,7 +74,7 @@
           %b Difficulty
         %td
           .dropdown
-            = link_to '#', class: 'dropdown-toggle', id: 'difficulty-dropdown' do
+            = link_to '#', class: 'dropdown-toggle', id: 'difficulty-dropdown', 'data-toggle' => 'dropdown' do
               - if @event.difficulty_level.nil?
                 Difficulty Level
               - else
@@ -91,7 +91,7 @@
           %b Requires Registration
         %td
           = check_box_tag @conference.short_title, @event.id, @event.require_registration,
-            method: :patch, url: "/admin/conference/#{@conference.short_title}/program/events/#{@event.id}?event[require_registration]=",
+            method: :patch, url: "/admin/conferences/#{@conference.short_title}/program/events/#{@event.id}?event[require_registration]=",
             class: 'switch-checkbox', data: { size: 'small',
                                               off_color: 'warning',
                                               on_text: 'Yes',
@@ -99,7 +99,7 @@
           - if @event.require_registration
             = registered_text(@event)
 
-      -if @program.languages.present?
+      - if @program.languages.present?
         %tr
           %td
             %b Language
@@ -117,7 +117,7 @@
           %td
             %b Scheduled time
           %td
-            = @event.time
+            = time_with_timezone(@event.time)
       %tr
         %td
           %b Submitter
@@ -131,9 +131,26 @@
             %i Hidden
       %tr
         %td
-          %b Biography
+          %b Speakers
         %td
-          = markdown(@event.submitter.biography)
+          - if @program.show_voting?
+            - @event.speakers.each do |speaker|
+              %div
+                = link_to speaker.name, admin_user_path(speaker)
+                (
+                = link_to speaker.email, "mailto: #{speaker.email}"
+                )
+          - else
+            %i Hidden
+      %tr
+        %td
+          %b Biographies
+        %td
+          - @event.speakers.each do |speaker|
+            - unless speaker.biography.blank?
+              %b
+                = speaker.name
+              = markdown(speaker.biography)
       %tr
         %td
           %b Submitted on

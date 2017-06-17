@@ -1,6 +1,9 @@
 Osem::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
+  # Allow the web console from the vagrant host ip
+  config.web_console.whitelisted_ips = '10.0.2.2'
+
   # Use letter_opener_web for Vagrant (launchy won't work)
   config.action_mailer.delivery_method = ENV['USER'] == 'vagrant' ? :letter_opener_web : :letter_opener
 
@@ -34,6 +37,9 @@ Osem::Application.configure do
   # Do not eager load code on boot.
   config.eager_load = false
 
+  # Do not log asset requests
+  config.assets.quiet = true
+
   # Set the detault url for action mailer
   config.action_mailer.default_url_options = { host: (ENV['OSEM_HOSTNAME'] || 'localhost:3000') }
 
@@ -48,9 +54,9 @@ Osem::Application.configure do
                               provider: 'facebook',
                               uid: 'facebook-test-uid-1',
                               info: {
-                                name: 'admin admin',
-                                email: 'admin@email.com',
-                                username: 'admin_admin'
+                                name: 'facebook user',
+                                email: 'user-facebook@example.com',
+                                username: 'user_facebook'
                               },
                               credentials: {
                                 token: 'fb_mock_token',
@@ -63,9 +69,9 @@ Osem::Application.configure do
                               provider: 'google',
                               uid: 'google-test-uid-1',
                               info: {
-                                name: 'simple user',
-                                email: 'user0@email.com',
-                                username: 'simple_user0'
+                                name: 'google user',
+                                email: 'user-google@example.com',
+                                username: 'user_google'
                               },
                               credentials: {
                                 token: 'google_mock_token',
@@ -78,9 +84,9 @@ Osem::Application.configure do
                               provider: 'suse',
                               uid: 'suse-test-uid-1',
                               info: {
-                                name: 'another user',
-                                email: 'user1@email.com',
-                                username: 'another_user'
+                                name: 'suse user',
+                                email: 'user-suse@example.com',
+                                username: 'user_suse'
                               },
                               credentials: {
                                 token: 'suse_mock_token',
@@ -88,6 +94,20 @@ Osem::Application.configure do
                               }
                             )
 
+  OmniAuth.config.mock_auth[:github] =
+      OmniAuth::AuthHash.new(
+                              provider: 'github',
+                              uid: 'github-test-uid-1',
+                              info: {
+                                name: 'github user',
+                                email: 'user-github@example.com',
+                                username: 'user_github'
+                              },
+                              credentials: {
+                                token: 'github_mock_token',
+                                secret: 'github_mock_secret'
+                              }
+                            )
 
   config.after_initialize do
     Devise.setup do |devise_config|

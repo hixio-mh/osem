@@ -10,6 +10,7 @@ class Program < ActiveRecord::Base
   has_many :tracks, dependent: :destroy
   has_many :difficulty_levels, dependent: :destroy
   has_many :schedules, dependent: :destroy
+  has_many :event_schedules, through: :schedules
   belongs_to :selected_schedule, class_name: 'Schedule'
   has_many :events, dependent: :destroy do
     def require_registration
@@ -38,11 +39,16 @@ class Program < ActiveRecord::Base
       where(state: :confirmed, is_highlight: true)
     end
   end
+  has_many :event_schedules, through: :events
 
   has_many :event_users, through: :events
   has_many :speakers, -> { distinct }, through: :event_users, source: :user do
     def confirmed
       joins(:events).where(events: { state: :confirmed })
+    end
+
+    def registered(conference)
+      joins(:registrations).where('registrations.conference_id = ?', conference.id)
     end
   end
 
@@ -52,11 +58,15 @@ class Program < ActiveRecord::Base
 
 #   validates :conference_id, presence: true, uniqueness: true
   validates :rating, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 10, only_integer: true }
+  validates :schedule_interval, numericality: { greater_than_or_equal_to: 5, less_than_or_equal_to: 60 }, presence: true
+  validate :schedule_interval_divisor_60
   validate :voting_start_date_before_end_date
   validate :voting_dates_exist
 
   after_create :create_event_types
   after_create :create_difficulty_levels
+  after_save :unschedule_unfit_events, if: :schedule_interval_changed?
+  after_save :normalize_event_types_length, if: :schedule_interval_changed?
   validate :check_languages_format
 
   # Returns all event_schedules for the selected schedule ordered by start_time
@@ -72,16 +82,16 @@ class Program < ActiveRecord::Base
   def show_voting?
     return true unless blind_voting
 
-    Date.today > voting_end_date
+    Time.current > voting_end_date
   end
 
   ##
   # Checks if we are still in voting period
   # ====Returns
-  # * +true+ -> If the voting period is not over yet
+  # * +true+ -> If the voting period is not over yet (or if the voting dates are not set)
   # * +false+ -> If the voting period is over
   def voting_period?
-    return false unless voting_start_date && voting_end_date
+    return true unless voting_start_date && voting_end_date
 
     (voting_start_date.to_datetime..voting_end_date.to_datetime).cover? Time.current
   end
@@ -115,7 +125,7 @@ class Program < ActiveRecord::Base
   # * +false+ -> If rating is not enabled
   # * +true+ -> If rating is enabled
   def rating_enabled?
-    self.rating && self.rating > 0
+    rating && rating > 0
   end
 
   ##
@@ -139,7 +149,7 @@ class Program < ActiveRecord::Base
   end
 
   def languages_list
-    self.languages.split(',').map {|l| ISO_639.find(l).english_name} if self.languages.present?
+    languages.split(',').map {|l| ISO_639.find(l).english_name} if languages.present?
   end
 
   ##
@@ -150,7 +160,7 @@ class Program < ActiveRecord::Base
   # * +False+ -> If there is not any event for the given date
   def any_event_for_this_date?(date)
     parsed_date = DateTime.parse("#{date} 00:00").utc
-    events.where(start_time: parsed_date..(parsed_date + 1)).any?
+    EventSchedule.where(schedule: selected_schedule).where(start_time: parsed_date..(parsed_date + 1)).any?
   end
 
   private
@@ -161,10 +171,10 @@ class Program < ActiveRecord::Base
   def create_event_types
     EventType.create(title: 'Talk', length: 30, color: '#FF0000', description: 'Presentation in lecture format',
                      minimum_abstract_length: 0,
-                     maximum_abstract_length: 500, program_id: self.id)
+                     maximum_abstract_length: 500, program_id: id)
     EventType.create(title: 'Workshop', length: 60, color: '#0000FF', description: 'Interactive hands-on practice',
                      minimum_abstract_length: 0,
-                     maximum_abstract_length: 500, program_id: self.id)
+                     maximum_abstract_length: 500, program_id: id)
     true
   end
 
@@ -174,13 +184,13 @@ class Program < ActiveRecord::Base
   def create_difficulty_levels
     DifficultyLevel.create(title: 'Easy',
                            description: 'Events are understandable for everyone without knowledge of the topic.',
-                           color: '#70EF69', program_id: self.id)
+                           color: '#32CB2A', program_id: id)
     DifficultyLevel.create(title: 'Medium',
                            description: 'Events require a basic understanding of the topic.',
-                           color: '#EEEF69', program_id: self.id)
+                           color: '#E6B65B', program_id: id)
     DifficultyLevel.create(title: 'Hard',
                            description: 'Events require expert knowledge of the topic.',
-                           color: '#EF6E69', program_id: self.id)
+                           color: '#EF6E69', program_id: id)
     true
   end
 
@@ -188,15 +198,42 @@ class Program < ActiveRecord::Base
   # Check if languages string has the right format. Used as validation.
   #
   def check_languages_format
-    return unless self.languages.present?
+    return unless languages.present?
     # All white spaces are removed to allow languages to be separated by ',' and ', '. The languages string without spaces is saved
-    self.languages = self.languages.delete(' ').downcase
+    self.languages = languages.delete(' ').downcase
     errors.add(:languages, 'must be two letters separated by commas') && return unless
-    self.languages.match(/^$|(\A[a-z][a-z](,[a-z][a-z])*\z)/).present?
-    languages_array = self.languages.split(',')
+    languages.match(/^$|(\A[a-z][a-z](,[a-z][a-z])*\z)/).present?
+    languages_array = languages.split(',')
     # We check that languages are not repeated
     errors.add(:languages, "can't be repeated") && return unless languages_array.uniq!.nil?
     # We check if every language is a valid ISO 639-1 language
     errors.add(:languages, 'must be ISO 639-1 valid codes') unless languages_array.select{ |x| ISO_639.find(x).nil? }.empty?
+  end
+
+  ##
+  # Check if schedule_interval is a divisor of 60 minutes
+  #
+  def schedule_interval_divisor_60
+    errors.add(:schedule_interval, 'must be a divisor of 60') if schedule_interval > 0 && 60 % schedule_interval > 0
+  end
+
+  ##
+  # Unschedule all the events which don't fit
+  #
+  def unschedule_unfit_events
+    unfit_schedules = event_schedules.select do |event_schedule|
+      event_schedule.start_time.min % schedule_interval > 0
+    end
+    EventSchedule.where(id: unfit_schedules.map(&:id)).destroy_all
+  end
+
+  ##
+  # Change event type length according schedule interval
+  #
+  def normalize_event_types_length
+    event_types.each do |event_type|
+      new_length = event_type.length > schedule_interval ? event_type.length - (event_type.length % schedule_interval) : schedule_interval
+      event_type.update_attributes length: new_length
+    end
   end
 end

@@ -43,9 +43,12 @@ $(function () {
      * Adds the default template as value to the regarding email textarea field.
      */
     $(".load_template").on('click', function () {
-        var template = $(this).data('template');
-        var textarea_name = $(this).data('name');
-        $('#' + textarea_name).val(template);
+      var subject_input_id = $(this).data('subject-input-id');
+      var subject_input_text = $(this).data('subject-text');
+      var body_input_id = $(this).data('body-input-id');
+      var body_input_text = $(this).data('body-text');
+      $('#' + subject_input_id).val(subject_input_text);
+      $('#' + body_input_id).val(body_input_text);
     });
 
     /**
@@ -145,19 +148,15 @@ function get_color() {
 }
 
 function word_count(text, divId, maxcount) {
-    var r = 0;
-    var input = text.value.replace(/\s/g,' ');
-    var word_array = input.split(' ');
-    for (var i=0; i < word_array.length; i++) {
-        if (word_array[i].length > 0) r++;
-    }
+    var area = document.getElementById(text.id)
 
-    $('#' + divId).text(r);
-    if (r > maxcount) {
-        $('#' + divId).css('color', 'red');
-    } else {
-        $('#' + divId).css('color', '#333');
-    }
+    Countable.live(area, function(counter) {
+        $('#' + divId).text(counter.words);
+        if (counter.words > maxcount)
+            $('#' + divId).css('color', 'red');
+        else
+            $('#' + divId).css('color', 'black');
+    });
 };
 
 /* Wait for the DOM to be ready before attaching events to the elements */

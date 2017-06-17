@@ -7,9 +7,11 @@ FactoryGirl.define do
     timezone { Faker::Address.time_zone }
     start_date { Date.today }
     end_date { 6.days.from_now }
+    start_hour 9
+    end_hour 20
     registration_limit 0
     description { Faker::Hipster.paragraph }
-
+    organization
     after(:create) do |conference|
       Role.where(name: 'organizer', resource: conference).first_or_create(description: 'For the organizers of the conference (who shall have full access)')
       Role.where(name: 'cfp', resource: conference).first_or_create(description: 'For the members of the CfP team')

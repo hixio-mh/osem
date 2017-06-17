@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Admin::ConferenceController do
+describe Admin::ConferencesController do
 
   # It is necessary to use bang version of let to build roles before user
   let(:conference) { create(:conference, end_date: Date.new(2014, 05, 26) + 15) }
@@ -56,8 +56,8 @@ describe Admin::ConferenceController do
                                           short_title: nil)
 
           conference.reload
-          expect(flash[:error]).
-              to eq("Updating conference failed. Short title can't be blank.")
+          expect(flash[:error])
+              .to eq("Updating conference failed. Short title can't be blank.")
           expect(conference.title).to eq("#{conference.title}")
           expect(conference.short_title).to eq("#{conference.short_title}")
         end
@@ -67,8 +67,8 @@ describe Admin::ConferenceController do
               attributes_for(:conference, title: 'Example Con',
                                           short_title: nil)
 
-          expect(flash[:error]).
-              to eq("Updating conference failed. Short title can't be blank.")
+          expect(flash[:error])
+              .to eq("Updating conference failed. Short title can't be blank.")
           expect(response).to redirect_to edit_admin_conference_path(
                                               conference.short_title)
         end

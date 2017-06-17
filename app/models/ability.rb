@@ -62,6 +62,10 @@ class Ability
       can [:new, :create], Event do |event|
         event.program.cfp_open? && event.new_record?
       end
+
+      can [:show, :events], Schedule do |schedule|
+        schedule.program.schedule_public
+      end
     end
   end
 
@@ -76,9 +80,10 @@ class Ability
 
     can [:new, :create], Registration do |registration|
       conference = registration.conference
-      conference.registration_open? && !conference.registration_limit_exceeded?
+      conference.registration_open? && !conference.registration_limit_exceeded? || conference.program.speakers.confirmed.include?(user)
     end
 
+    can :index, Organization
     can :index, Ticket
     can :manage, TicketPurchase, user_id: user.id
     can [:new, :create], Payment, user_id: user.id
@@ -95,6 +100,8 @@ class Ability
 
     # can manage the commercials of their own events
     can :manage, Commercial, commercialable_type: 'Event', commercialable_id: user.events.pluck(:id)
+
+    can [:destroy], Openid
   end
 
   # Abilities for signed in users with roles
@@ -115,6 +122,9 @@ class Ability
     # for admins
     can :manage, :all if user.is_admin
 
+    # even admin cannot create new users with ICHAIN enabled
+    cannot [:new, :create], User if ENV['OSEM_ICHAIN_ENABLED'] == 'true'
+
     cannot :revert_object, PaperTrail::Version do |version|
       (version.event == 'create' && %w(Conference User Event).include?(version.item_type))
     end
@@ -134,6 +144,7 @@ class Ability
     # ids of all the conferences for which the user has the 'organizer' role
     conf_ids_for_organizer = Conference.with_role(:organizer, user).pluck(:id)
 
+    can :manage, Resource, conference_id: conf_ids_for_organizer
     can [:new, :create], Conference if user.has_role?(:organizer, :any)
     can :manage, Conference, id: conf_ids_for_organizer
     can :manage, Splashpage, conference_id: conf_ids_for_organizer
@@ -187,11 +198,13 @@ class Ability
     # ids of all the conferences for which the user has the 'cfp' role
     conf_ids_for_cfp = Conference.with_role(:cfp, user).pluck(:id)
 
+    can [:index, :show, :update], Resource, conference_id: conf_ids_for_cfp
     can :manage, Event, program: { conference_id: conf_ids_for_cfp }
     can :manage, EventType, program: { conference_id: conf_ids_for_cfp }
     can :manage, Track, program: { conference_id: conf_ids_for_cfp }
     can :manage, DifficultyLevel, program: { conference_id: conf_ids_for_cfp }
     can :manage, EmailSettings, conference_id: conf_ids_for_cfp
+    can :manage, Schedule, program: { conference_id: conf_ids_for_cfp }
     can :manage, Room, venue: { conference_id: conf_ids_for_cfp }
     can :show, Venue, conference_id: conf_ids_for_cfp
     can :show, Commercial, commercialable_type: 'Venue', commercialable_id: Venue.where(conference_id: conf_ids_for_cfp).pluck(:id)
@@ -213,6 +226,7 @@ class Ability
     end
 
     can [:index, :revert_object, :revert_attribute], PaperTrail::Version, item_type: 'Event', conference_id: conf_ids_for_cfp
+    can [:index, :revert_object, :revert_attribute], PaperTrail::Version, item_type: 'Vote', conference_id: conf_ids_for_cfp
     can [:index, :revert_object, :revert_attribute], PaperTrail::Version do |version|
       version.item_type == 'Commercial' && conf_ids_for_cfp.include?(version.conference_id) &&
       (version.object.to_s.include?('Event') || version.object_changes.to_s.include?('Event'))
@@ -223,6 +237,7 @@ class Ability
     # ids of all the conferences for which the user has the 'info_desk' role
     conf_ids_for_info_desk = Conference.with_role(:info_desk, user).pluck(:id)
 
+    can [:index, :show, :update], Resource, conference_id: conf_ids_for_info_desk
     can :manage, Registration, conference_id: conf_ids_for_info_desk
     can :manage, Question, conference_id: conf_ids_for_info_desk
     can :manage, Question do |question|
@@ -244,6 +259,7 @@ class Ability
     # ids of all the conferences for which the user has the 'volunteers_coordinator' role
     conf_ids_for_volunteers_coordinator = Conference.with_role(:volunteers_coordinator, user).pluck(:id)
 
+    can [:index, :show, :update], Resource, conference_id: conf_ids_for_volunteers_coordinator
     can :manage, Vposition, conference_id: conf_ids_for_volunteers_coordinator
     can :manage, Vday, conference_id: conf_ids_for_volunteers_coordinator
 

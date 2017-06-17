@@ -26,11 +26,11 @@ class User < ActiveRecord::Base
   devise_modules = []
 
   if ENV['OSEM_ICHAIN_ENABLED'] == 'true'
-    devise_modules += [ :ichain_authenticatable, :ichain_registerable, :omniauthable, omniauth_providers: [] ]
+    devise_modules += [:ichain_authenticatable, :ichain_registerable, :omniauthable, omniauth_providers: []]
   else
     devise_modules += [:database_authenticatable, :registerable,
                        :recoverable, :rememberable, :trackable, :validatable, :confirmable,
-                       :omniauthable, omniauth_providers: [:suse, :google, :facebook, :github] ]
+                       :omniauthable, omniauth_providers: [:suse, :google, :facebook, :github]]
   end
 
   devise(*devise_modules)
@@ -41,6 +41,7 @@ class User < ActiveRecord::Base
 
   has_many :event_users, dependent: :destroy
   has_many :events, -> { uniq }, through: :event_users
+  has_many :presented_events, -> { joins(:event_users).where(event_users: {event_role: 'speaker'}).uniq }, through: :event_users, source: :event
   has_many :registrations, dependent: :destroy
   has_many :events_registrations, through: :registrations
   has_many :ticket_purchases, dependent: :destroy
@@ -52,6 +53,7 @@ class User < ActiveRecord::Base
   accepts_nested_attributes_for :roles
 
   scope :admin, -> { where(is_admin: true) }
+  scope :active, -> { where(is_disabled: false) }
 
   validates :email, presence: true
 
@@ -72,7 +74,7 @@ class User < ActiveRecord::Base
   # * +true+ if the user attended the event
   # * +false+ if the user did not attend the event
   def attended_event? event
-    event_registration = event.events_registrations.find_by(registration: self.registrations)
+    event_registration = event.events_registrations.find_by(registration: registrations)
 
     return false unless event_registration.present?
     event_registration.attended
@@ -87,11 +89,11 @@ class User < ActiveRecord::Base
   # ====Returns
   # * +true+ or +false+
   def registered_to_event? event
-    event.registrations.pluck(:id).include? self.registrations.find_by(conference_id: event.program.conference.id).id
+    event.registrations.include? registrations.find_by(conference: event.program.conference)
   end
 
   def subscribed? conference
-    self.subscriptions.find_by(conference_id: conference.id).present?
+    subscriptions.find_by(conference_id: conference.id).present?
   end
 
   def supports? conference
@@ -206,8 +208,8 @@ class User < ActiveRecord::Base
   # Check if biography has an allowed number of words. Used as validation.
   #
   def biography_limit
-    if self.biography.present?
-      errors.add(:biography, 'is limited to 150 words.') if self.biography.split.length > 150
+    if biography.present?
+      errors.add(:biography, 'is limited to 150 words.') if biography.split.length > 150
     end
   end
 end
