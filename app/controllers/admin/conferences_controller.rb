@@ -166,6 +166,16 @@ module Admin
       @difficulty_levels_distribution_confirmed = @conference
           .difficulty_levels_distribution(:confirmed)
 
+
+      @diversity_distribution = @conference.diversity_distribution
+      @diversity_distribution_confirmed = @conference
+          .diversity_distribution(:confirmed)
+
+
+      @first_time_distribution = @conference.first_time_distribution
+      @first_time_distribution_confirmed = @conference
+          .first_time_distribution(:confirmed)
+
       @tracks_distribution = @conference.tracks_distribution
       @tracks_distribution_confirmed = @conference.tracks_distribution(:confirmed)
 
