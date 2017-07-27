@@ -551,6 +551,85 @@ class Conference < ActiveRecord::Base
   end
 
   ##
+  # Calculates the diversity distribution from all events.
+  #
+  # ====Returns
+  # * +hash+ -> diversity => {color, value}
+  def diversity_distribution(state = nil)
+    result = {}
+
+    if state
+      count_yes = program.events.select(:diversity).where('diversity = ?', 1).where('state = ?', state).group(:diversity).count[true]
+      count_no  = program.events.select(:diversity).where('diversity = ?', 0).where('state = ?', state).group(:diversity).count[false]
+    else
+      count_yes = program.events.select(:diversity).where('diversity = ?', 1).group(:diversity).count[true]
+      count_no  = program.events.select(:diversity).where('diversity = ?', 0).group(:diversity).count[false]
+    end
+
+    if count_yes.nil?
+        count_yes = 0
+    end
+
+    if count_no.nil?
+        count_no = 0
+    end
+
+    if count_yes > 0 or count_no > 0
+      result["Yes"] = {
+        'value' => count_yes,
+        'color' => "#0000FF"
+      }
+
+      result["No"] = {
+        'value' => count_no,
+        'color' => "#FF0000"
+      }
+    end
+
+    result
+  end
+
+  ##
+  # Calculates the first_time distribution from all events.
+  #
+  # ====Returns
+  # * +hash+ -> first_time => {color, value}
+  def first_time_distribution(state = nil)
+
+    result = {}
+
+    if state
+      count_yes = program.events.select(:first_time).where('first_time = ?', 1).where('state = ?', state).group(:first_time).count[true]
+      count_no  = program.events.select(:first_time).where('first_time = ?', 0).where('state = ?', state).group(:first_time).count[false]
+    else
+      count_yes = program.events.select(:first_time).where('first_time = ?', 1).group(:first_time).count[true]
+      count_no  = program.events.select(:first_time).where('first_time = ?', 0).group(:first_time).count[false]
+    end
+
+    if count_yes.nil?
+        count_yes = 0
+    end
+
+    if count_no.nil?
+        count_no = 0
+    end
+
+    if count_yes > 0 or count_no > 0
+      result["Yes"] = {
+        'value' => count_yes,
+        'color' => "#0000FF"
+      }
+
+      result["No"] = {
+        'value' => count_no,
+        'color' => "#FF0000"
+      }
+    end
+
+    result
+  end
+
+  ##
   # Calculates the track distribution from all events.
   #
   # ====Returns

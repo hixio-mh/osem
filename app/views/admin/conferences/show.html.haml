@@ -94,20 +94,28 @@
     .tab-content
       .tab-pane.active#distribution_all
         .row
-          .col-md-4
+          .col-md-2
             = render partial: 'doughnut_chart', locals: {title: 'Event types', data: @event_type_distribution}
-          .col-md-4
+          .col-md-2
             = render partial: 'doughnut_chart', locals: {title: 'Difficulty levels', data: @difficulty_levels_distribution}
-          .col-md-4
+          .col-md-2
             = render partial: 'doughnut_chart', locals: {title: 'Tracks', data: @tracks_distribution}
+          .col-md-2
+            = render partial: 'doughnut_chart', locals: {title: 'Diversity', data: @diversity_distribution}
+          .col-md-2
+            = render partial: 'doughnut_chart', locals: {title: 'First Time', data: @first_time_distribution}
       .tab-pane#distribution_confirmed
         .row
-          .col-md-4
+          .col-md-2
             = render partial: 'doughnut_chart', locals: {title: 'Event types', data: @event_type_distribution_confirmed}
-          .col-md-4
+          .col-md-2
             = render partial: 'doughnut_chart', locals: {title: 'Difficulty levels', data: @difficulty_levels_distribution_confirmed}
-          .col-md-4
+          .col-md-2
             = render partial: 'doughnut_chart', locals: {title: 'Tracks', data: @tracks_distribution_confirmed}
+          .col-md-2
+            = render partial: 'doughnut_chart', locals: {title: 'Diversity', data: @diversity_distribution_confirmed}
+          .col-md-2
+            = render partial: 'doughnut_chart', locals: {title: 'First Time', data: @first_time_distribution_confirmed}
 
 .row
   .col-md-8
