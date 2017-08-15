@@ -2,7 +2,8 @@ class Comment < ActiveRecord::Base
   acts_as_nested_set scope: %i(commentable_id commentable_type)
   validates :body, presence: true
   validates :user, presence: true
-  after_create :send_notification
+  # Disabled due to spamming the speaker mailing lists
+  # after_create :send_notification
 
   # NOTE: install the acts_as_votable plugin if you
   # want user to vote on the quality of comments.
