@@ -3,12 +3,13 @@ require 'mina/rails'
 require 'mina/git'
 require 'mina/rvm'
 
-set :domain, 'osem.seagl.org'
+set :domain, 'ec2-34-215-251-19.us-west-2.compute.amazonaws.com'
 set :user, 'ubuntu'
 set :deploy_to, '/srv/www/osem'
 set :repository, 'https://github.com/seagl/osem.git'
 set :term_mode, nil
-set :rvm_path, '/usr/local/rvm/bin/rvm'
+set :rvm_path, '/usr/share/rvm/bin/rvm'
+set :rvm_use_path, '/usr/share/rvm/scripts/rvm'
 
 # Manually create these paths in shared/ (eg: shared/config/database.yml) in your server.
 # They will be linked in the 'deploy:link_shared_paths' step.
@@ -16,7 +17,7 @@ set :shared_paths, %w{ log public/system config/secrets.yml config/piwik.yml tmp
 
 task :environment do
   # For those using RVM, use this to load an RVM version@gemset.
-  invoke :'rvm:use', 'ruby-2.3.0'
+  invoke :'rvm:use[ruby-2.3.0@default]'
 end
 
 task setup: :environment do
