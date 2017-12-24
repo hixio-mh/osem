@@ -68,6 +68,7 @@ gem 'haml-rails'
 gem 'sass-rails', '>= 4.0.2'
 
 # as compressor for JavaScript assets
+gem "therubyracer"
 gem 'uglifier', '>= 1.3.0'
 
 # as the front-end framework
