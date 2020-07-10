@@ -13,59 +13,47 @@ In particular, this community seeks the following types of contributions:
 * code editing: fix typos, clarify language, and generally improve the quality of the content of OSEM
 
 ## Running OSEM in development
-We are using [Vagrant](https://www.vagrantup.com/) to create our development environments.
+We are using a containerized development environment.
 
-1. Install [Vagrant](https://www.vagrantup.com/downloads.html) and [VirtualBox 5.0.10](https://www.virtualbox.org/wiki/Download_Old_Builds_5_0). Both tools support Linux, MacOS and Windows.
+1. Install [Docker Engine] and [Docker Compose].
 
-2. Install [vagrant-exec](https://github.com/p0deje/vagrant-exec):
+2. Clone this code repository:
 
-    ```
-    vagrant plugin install vagrant-exec
-    ```
-
-3. Clone this code repository:
-
-    ```
-    git clone https://github.com/openSUSE/osem.git
+    ```bash
+    git clone 'https://github.com/SeaGL/osem.git' && cd 'osem'
     ```
 
-4. Execute Vagrant in the cloned directory:
+3. Build the application image:
 
-    ```
-    vagrant up
-    ```
-
-5. Deploy the initial database migration:
-
-    ```
-    vagrant exec bundle exec rake db:migrate
+    ```bash
+    docker-compose build --build-arg "UID=$UID"
     ```
 
-6. Start your OSEM rails app:
+4. Run the test suite:
 
-    ```
-    vagrant exec /vagrant/bin/rails server -b 0.0.0.0
-    ```
-
-7. Check out your OSEM rails app:
-You can access the app [localhost:3000](http://localhost:3000). Whatever you change in your cloned repository will have effect in the development environment. Sign up, the first user will be automatically assigned the admin role.
-
-8. Changed something? Test your changes!:
-
-    ```
-    vagrant exec bundle exec rspec spec
+    ```bash
+    docker-compose run --rm web rspec
     ```
 
-9. Explore the development environment:
+5. Start the application at [`localhost:3000`](http://localhost:3000/):
 
-    ```
-    vagrant ssh
+    ```bash
+    docker-compose run --rm web rake db:setup
+    docker-compose up
     ```
 
-10. Or issue any standard `rails`/`rake`/`bundler` command by prepending `vagrant exec`
+6. Create a user account in the web interface. The first user will be automatically assigned the admin role.
 
+7. To open the Rails console:
+
+    ```bash
+    docker-compose exec web rails console
     ```
-    vagrant exec bundle exec rake db:migrate
+
+8. To clean up:
+
+    ```bash
+    docker-compose down --rmi 'all' --volumes
     ```
 
 ## How to contribute code
@@ -134,7 +122,7 @@ Reviewing your PR might take some time, as we are all volunteers. Please be resp
 We are using [rubocop](https://github.com/bbatsov/rubocop) as a style checker. It is checking code style each time the test suite runs. You can run it locally with
 
 ```shell
-vagrant exec bundle exec rubocop
+docker-compose run --rm web rubocop
 ```
 
 You can read through current enabled rules in `.rubocop.yml` file. Explanations of the defined [rules](http://rubydoc.info/github/bbatsov/rubocop/master/frames) can be found in modules [Cop::Lint](http://rubydoc.info/github/bbatsov/rubocop/master/Rubocop/Cop/Lint) and [Cop::Style](http://rubydoc.info/github/bbatsov/rubocop/master/Rubocop/Cop/Style) and [Cop:Rails](https://rubocop.readthedocs.io/en/latest/cops_rails/).
@@ -144,7 +132,7 @@ Additionally you can read through the [ruby style-guide](https://github.com/bbat
 We are using [rspec](http://rspec.info/)+[capybara](http://jnicklas.github.io/capybara/)+[factory girl](https://github.com/thoughtbot/factory_girl) as a test suite. You can run it locally
 
 ```shell
-vagrant exec bundle exec rspec
+docker-compose run --rm web rspec
 ```
 
 ### Review App of your PR
@@ -230,3 +218,6 @@ OSEM is part of the openSUSE project. We follow all the [openSUSE Guiding Princi
 
 ## Contact
 GitHub issues are the primary way for communicating about specific proposed changes to this project. If you have other questions feel free to subscribe to the [opensuse-web@opensuse.org](http://lists.opensuse.org/opensuse-web/) mailinglist, all OSEM contributors are on that list! Additionally you can use #osem channel on freenode IRC.
+
+[docker compose]: https://docs.docker.com/compose/
+[docker engine]: https://docs.docker.com/engine/

@@ -260,14 +260,6 @@ Style/AccessorMethodName:
     - 'app/models/target.rb'
     - 'app/models/user.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles, IndentationWidth.
-# SupportedStyles: with_first_parameter, with_fixed_indentation
-Style/AlignParameters:
-  Exclude:
-    - 'Vagrantfile'
-
 # Offense count: 2
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
@@ -406,7 +398,6 @@ Style/ExtraSpacing:
 Style/FileName:
   Exclude:
     - 'Gemfile'
-    - 'Vagrantfile'
 
 # Offense count: 42
 # Cop supports --auto-correct.
@@ -834,7 +825,6 @@ Style/SpaceInsidePercentLiteralDelimiters:
 Style/StringLiterals:
   Exclude:
     - 'Gemfile'
-    - 'Vagrantfile'
     - 'lib/tasks/dump_db.rake'
     - 'lib/tasks/events_registrations.rake'
     - 'lib/tasks/factory_girl.rake'

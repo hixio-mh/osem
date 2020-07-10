@@ -27,9 +27,9 @@ pickle-email-*.html
 /bundle
 /doc/app
 .ruby-version
-.vagrant/
 .env
 .env.production
 .env.development
 .env.test
 .env.local
+/docker-compose.override.yml

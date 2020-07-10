@@ -1,11 +1,8 @@
 Osem::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
-  # Allow the web console from the vagrant host ip
-  config.web_console.whitelisted_ips = '10.0.2.2'
-
-  # Use letter_opener_web for Vagrant (launchy won't work)
-  config.action_mailer.delivery_method = ENV['USER'] == 'vagrant' ? :letter_opener_web : :letter_opener
+  # Use letter_opener_web (launchy won't work in headless environments)
+  config.action_mailer.delivery_method = :letter_opener_web
 
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
