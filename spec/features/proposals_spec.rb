@@ -101,12 +101,16 @@ feature Event do
       select('Easy', from: 'event[difficulty_level_id]')
 
       check 'I am local to the Pacific Northwest'
+      check 'I identify as a member of a group that is historically under-represented in technology'
+      check 'This will be my first time speaking at a conference'
 
       expect {
         click_button 'Update Proposal'
         expect(flash).to eq('Proposal was successfully updated.')
         proposal.reload
       }.to change { proposal.pnw }
+       .and change { proposal.diversity }
+       .and change { proposal.first_time }
     end
 
     scenario 'signed_in user submits a valid proposal', feature: true, js: true do
