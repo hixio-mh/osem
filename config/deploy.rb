@@ -3,7 +3,7 @@ require 'mina/rails'
 require 'mina/git'
 require 'mina/rvm'
 
-set :domain, 'ec2-34-215-251-19.us-west-2.compute.amazonaws.com'
+set :domain, 'osem.seagl.org'
 set :user, 'ubuntu'
 set :deploy_to, '/srv/www/osem'
 set :repository, 'https://github.com/seagl/osem.git'
