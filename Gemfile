@@ -6,7 +6,7 @@ if Gem::Version.new(Bundler::VERSION) < Gem::Version.new('1.8.4')
 end
 
 # as web framework
-gem 'rails', '~> 4.2'
+gem 'rails', '~> 4.2', '>= 4.2.7.1'
 
 # enables serving assets in production and setting your logger to standard out
 # both of which are required to run an application on a twelve-factor provider
@@ -15,7 +15,7 @@ gem 'rails_12factor', group: :production
 
 # respond_to methods have been extracted to the responders gem
 # http://edgeguides.rubyonrails.org/upgrading_ruby_on_rails.html#responders
-gem 'responders', '~> 2.0'
+gem 'responders', '~> 2.1', '>= 2.1.1'
 
 # as the database for Active Record
 gem 'mysql2'
@@ -32,11 +32,11 @@ gem 'mini_magick'
 gem 'carrierwave-bombshelter'
 
 # for internationalizing
-gem 'rails-i18n', '~> 4.0.0'
+gem 'rails-i18n', '~> 4.0.8'
 
 # as authentification framework
-gem 'devise'
-gem 'devise_ichain_authenticatable'
+gem 'devise', '>= 4.2.0'
+gem 'devise_ichain_authenticatable', '>= 0.3.1'
 
 # for openID authentication
 gem 'omniauth'
@@ -52,7 +52,7 @@ gem 'cancancan'
 gem 'rolify'
 
 # to show flash messages from ajax requests
-gem 'unobtrusive_flash', '>=3'
+gem 'unobtrusive_flash', '>= 3.1.0'
 
 # as state machine
 gem 'transitions', :require => %w( transitions active_record/transitions )
@@ -62,10 +62,10 @@ gem 'awesome_nested_set', '~> 3.0.0.rc.5'
 gem 'acts_as_commentable_with_threading'
 
 # as templating language
-gem 'haml-rails'
+gem 'haml-rails', '>= 0.5.3'
 
 # for stylesheets
-gem 'sass-rails', '>= 4.0.2'
+gem 'sass-rails', '>= 4.0.4'
 
 # as compressor for JavaScript assets
 gem "therubyracer"
@@ -74,12 +74,12 @@ gem 'uglifier', '>= 1.3.0'
 # as the front-end framework
 gem 'bootstrap-sass', '~> 3.3.4.1'
 gem 'autoprefixer-rails'
-gem 'formtastic-bootstrap'
-gem 'formtastic', '~> 3.1.1'
+gem 'formtastic-bootstrap', '>= 3.1.1'
+gem 'formtastic', '~> 3.1.3'
 gem 'cocoon'
 
 # as the JavaScript library
-gem 'jquery-rails'
+gem 'jquery-rails', '>= 3.1.4'
 gem 'jquery-ui-rails', '~> 4.2.1'
 
 # for languages validation
@@ -110,11 +110,11 @@ source 'https://rails-assets.org' do
 end
 
 # as date picker
-gem 'bootstrap3-datetimepicker-rails', '~> 3.0.2'
-gem 'jquery-datatables-rails', '~> 2.2.1'
+gem 'bootstrap3-datetimepicker-rails', '~> 3.0.3'
+gem 'jquery-datatables-rails', '~> 2.2.3'
 
 # for charts
-gem 'chart-js-rails'
+gem 'chart-js-rails', '>= 0.0.6'
 
 # for displaying maps
 gem 'leaflet-rails'
@@ -126,23 +126,23 @@ gem 'gravtastic'
 gem 'country_select'
 
 # as PDF generator
-gem 'prawn_rails'
+gem 'prawn_rails', '>= 0.0.11'
 
 # to render XLS spreadsheets
 gem 'axlsx', git: 'https://github.com/randym/axlsx.git'
-gem 'axlsx_rails'
+gem 'axlsx_rails', '>= 0.2.0'
 
 # as error catcher
 gem 'hoptoad_notifier', '~> 2.3'
 
 # to make links faster
-gem 'turbolinks'
+gem 'turbolinks', '>= 2.5.3'
 
 # for JSON serialization of our API
 gem 'active_model_serializers'
 
 # as icon font
-gem 'font-awesome-rails'
+gem 'font-awesome-rails', '>= 4.1.0.0'
 
 # for markdown
 gem 'redcarpet'
@@ -153,7 +153,7 @@ gem 'rdoc-generator-fivefish'
 # for visitor tracking
 gem 'ahoy_matey'
 gem 'activeuuid'
-gem 'piwik_analytics', '~> 1.0.1'
+gem 'piwik_analytics', '~> 1.0.2'
 
 # for recurring jobs
 gem 'whenever', :require => false
@@ -163,7 +163,7 @@ gem 'delayed_job_active_record'
 gem 'daemons'
 
 # to encapsulate money in objects
-gem 'money-rails'
+gem 'money-rails', '>= 1.6.0'
 
 # for lists
 gem 'acts_as_list'
@@ -178,7 +178,7 @@ gem 'ruby-oembed'
 gem 'cloudinary'
 
 # for setting app configuration in the environment
-gem 'dotenv-rails'
+gem 'dotenv-rails', '>= 2.1.1'
 
 # For countable.js
 gem "countable-rails", "~> 0.0.1"
@@ -187,13 +187,13 @@ gem "countable-rails", "~> 0.0.1"
 # for fake data
 gem 'faker'
 # for seeds
-gem 'factory_girl_rails'
+gem 'factory_girl_rails', '>= 4.6.0'
 
 # for integrating Stripe payment gateway
 gem 'stripe'
 
 # Provides Sprockets implementation for Rails Asset Pipeline
-gem 'sprockets-rails'
+gem 'sprockets-rails', '>= 2.3.3'
 
 # for multiple speakers select on proposal/event forms
 gem 'selectize-rails'
@@ -211,19 +211,19 @@ group :development do
   # to open mails
   gem 'letter_opener'
   # to open mails in browser
-  gem 'letter_opener_web'
+  gem 'letter_opener_web', '>= 1.3.0'
   # as deployment system
   gem 'mina'
   # as debugger on error pages
-  gem 'web-console', '~> 2.0'
+  gem 'web-console', '~> 2.2', '>= 2.2.1'
 end
 
 group :test do
   # as test framework
-  gem 'rspec-rails'
+  gem 'rspec-rails', '>= 4.0.1'
   gem 'database_cleaner'
-  gem 'capybara'
-  gem 'poltergeist'
+  gem 'capybara', '>= 2.6.2'
+  gem 'poltergeist', '>= 1.9.0'
   gem 'phantomjs', :require => 'phantomjs/poltergeist'
   # for measuring test coverage
   gem 'coveralls', require: false
