@@ -422,7 +422,7 @@ GEM
       loggability (~> 0.6)
       rdoc (~> 4.0)
       yajl-ruby (~> 1.1)
-    redcarpet (3.2.3)
+    redcarpet (3.5.1)
     ref (2.0.0)
     referer-parser (0.2.1)
     request_store (1.1.0)
